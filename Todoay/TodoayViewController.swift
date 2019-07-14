@@ -10,12 +10,14 @@ import UIKit
 
 class TodoayViewController: UITableViewController  {
     
+    var defaults = UserDefaults.standard
     
     var arr = ["go to sleep" , "buy a pillow" , "don't forget the blanket"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        arr = defaults.array(forKey: "Array") as! [String]
         // Do any additional setup after loading the view.
         
     }
@@ -61,6 +63,8 @@ class TodoayViewController: UITableViewController  {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
         self.arr.append(addedText.text!)
             self.tableView.reloadData()
+            
+            self.defaults.setValue(self.arr, forKey: "Array")
         }
         alert.addTextField { (alertText) in
             alertText.placeholder = "create Item"
