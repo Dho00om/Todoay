@@ -11,12 +11,12 @@ import UIKit
 class TodoayViewController: UITableViewController  {
     
     
-    let arr = ["go to sleep" , "buy a pillow" , "don't forget the blanket"]
+    var arr = ["go to sleep" , "buy a pillow" , "don't forget the blanket"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         // Do any additional setup after loading the view.
-
         
     }
 
@@ -39,6 +39,7 @@ class TodoayViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        
         print(arr[indexPath.row])
         
         if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
@@ -51,8 +52,30 @@ class TodoayViewController: UITableViewController  {
         
        
         }
+    //MARK - TableView Delegate Methods
+    
+    @IBAction func addItem(_ sender: UIBarButtonItem) {
+        
+        var addedText = UITextField()
+        let alert = UIAlertController(title: "Add New Item", message: "Todoay list Items", preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+        self.arr.append(addedText.text!)
+            self.tableView.reloadData()
+        }
+        alert.addTextField { (alertText) in
+            alertText.placeholder = "create Item"
+            addedText = alertText
+            
+        }
+            alert.addAction(action)
+            
+            present(alert, animated: true, completion: nil)
+        
+        
     }
     
+    
+    }
 
 
 
