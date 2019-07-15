@@ -10,32 +10,17 @@ import UIKit
 
 class TodoayViewController: UITableViewController  {
     
-    var defaults = UserDefaults.standard
-    
     var arr = [Item]()
     
-    
+    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("item.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        arr = defaults.array(forKey: "Array") as! [String]
-//        // Do any additional setup after loading the view.
-        let newItem1 = Item()
-        newItem1.title = "bed"
-        arr.append(newItem1)
+        print(filePath)
+       loadData()
         
-        let newItem2 = Item()
-        newItem2.title = "pillow"
-        arr.append(newItem2)
         
-        let newItem3 = Item()
-        newItem3.title = "blanket"
-        arr.append(newItem3)
-        
-        if let items = defaults.array(forKey: "Array") as? [Item] {
-            arr = items
-        }
     }
 
     //MARK - TableView DataScource Methods
@@ -68,7 +53,8 @@ class TodoayViewController: UITableViewController  {
             arr[indexPath.row].checked = false
         }
         
-        tableView.reloadData()
+        self.saveData()
+        
         tableView.deselectRow(at: indexPath, animated: true)
         
        
@@ -87,11 +73,9 @@ class TodoayViewController: UITableViewController  {
             
             self.arr.append(newItem)
             
-            self.tableView.reloadData()
+            self.saveData()
             
-            self.defaults.setValue(self.arr, forKey: "Array")
-            
-            self.tableView.reloadData()
+           
         }
         alert.addTextField { (alertText) in
             alertText.placeholder = "create Item"
@@ -103,6 +87,35 @@ class TodoayViewController: UITableViewController  {
             present(alert, animated: true, completion: nil)
         
         
+    }
+    
+    func saveData(){
+        
+        let encoder = PropertyListEncoder()
+        
+        do {
+            
+            let data = try encoder.encode(arr)
+            try data.write(to: filePath!)
+        }catch {
+            print("Error Encoding Item Array \(error)")
+        }
+        self.tableView.reloadData()
+        
+    }
+    func loadData () {
+        
+        let data = try? Data(contentsOf: filePath!)
+        
+        let decoder = PropertyListDecoder()
+        do {
+        
+            arr = try decoder.decode([Item].self, from: data!)
+            
+        }catch {
+            print("Error Dcoding Item Array \(error)")
+            
+        }
     }
     
     
