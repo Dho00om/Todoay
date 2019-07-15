@@ -12,14 +12,30 @@ class TodoayViewController: UITableViewController  {
     
     var defaults = UserDefaults.standard
     
-    var arr = ["go to sleep" , "buy a pillow" , "don't forget the blanket"]
+    var arr = [Item]()
+    
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        arr = defaults.array(forKey: "Array") as! [String]
-        // Do any additional setup after loading the view.
+//        arr = defaults.array(forKey: "Array") as! [String]
+//        // Do any additional setup after loading the view.
+        let newItem1 = Item()
+        newItem1.title = "bed"
+        arr.append(newItem1)
         
+        let newItem2 = Item()
+        newItem2.title = "pillow"
+        arr.append(newItem2)
+        
+        let newItem3 = Item()
+        newItem3.title = "blanket"
+        arr.append(newItem3)
+        
+        if let items = defaults.array(forKey: "Array") as? [Item] {
+            arr = items
+        }
     }
 
     //MARK - TableView DataScource Methods
@@ -31,8 +47,12 @@ class TodoayViewController: UITableViewController  {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "Todoaycell", for: indexPath)
+        let item = arr[indexPath.row]
+        cell.textLabel?.text = item.title
         
-        cell.textLabel?.text = arr[indexPath.row]
+        cell.accessoryType = item.checked == true ? .checkmark : .none
+        
+       
         
         return cell
     }
@@ -41,19 +61,19 @@ class TodoayViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        
-        print(arr[indexPath.row])
-        
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-             tableView.cellForRow(at: indexPath)?.accessoryType = .none
+        if arr[indexPath.row].checked == false {
+            arr[indexPath.row].checked = true
+            
         }else {
-           tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+            arr[indexPath.row].checked = false
         }
         
+        tableView.reloadData()
         tableView.deselectRow(at: indexPath, animated: true)
         
        
         }
+    
     //MARK - TableView Delegate Methods
     
     @IBAction func addItem(_ sender: UIBarButtonItem) {
@@ -61,10 +81,17 @@ class TodoayViewController: UITableViewController  {
         var addedText = UITextField()
         let alert = UIAlertController(title: "Add New Item", message: "Todoay list Items", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
-        self.arr.append(addedText.text!)
+            
+            let newItem = Item()
+            newItem.title = addedText.text!
+            
+            self.arr.append(newItem)
+            
             self.tableView.reloadData()
             
             self.defaults.setValue(self.arr, forKey: "Array")
+            
+            self.tableView.reloadData()
         }
         alert.addTextField { (alertText) in
             alertText.placeholder = "create Item"
