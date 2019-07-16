@@ -7,18 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoayViewController: UITableViewController  {
     
     var arr = [Item]()
-    
-    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("item.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var selectedCategory : Category? {
+        didSet{
+            loadData()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        print(filePath)
-       loadData()
         
         
     }
@@ -35,7 +38,7 @@ class TodoayViewController: UITableViewController  {
         let item = arr[indexPath.row]
         cell.textLabel?.text = item.title
         
-        cell.accessoryType = item.checked == true ? .checkmark : .none
+        cell.accessoryType = item.checking == true ? .checkmark : .none
         
        
         
@@ -46,11 +49,11 @@ class TodoayViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        if arr[indexPath.row].checked == false {
-            arr[indexPath.row].checked = true
+        if arr[indexPath.row].checking == false {
+            arr[indexPath.row].checking = true
             
         }else {
-            arr[indexPath.row].checked = false
+            arr[indexPath.row].checking = false
         }
         
         self.saveData()
@@ -67,10 +70,12 @@ class TodoayViewController: UITableViewController  {
         var addedText = UITextField()
         let alert = UIAlertController(title: "Add New Item", message: "Todoay list Items", preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+    
+            let newItem = Item(context: self.context)
             
-            let newItem = Item()
             newItem.title = addedText.text!
-            
+            newItem.checking = false
+            newItem.isComponentOf = self.selectedCategory
             self.arr.append(newItem)
             
             self.saveData()
@@ -86,40 +91,63 @@ class TodoayViewController: UITableViewController  {
             
             present(alert, animated: true, completion: nil)
         
-        
     }
     
     func saveData(){
         
-        let encoder = PropertyListEncoder()
-        
         do {
-            
-            let data = try encoder.encode(arr)
-            try data.write(to: filePath!)
+            try
+                context.save()
         }catch {
-            print("Error Encoding Item Array \(error)")
+            print("Error saving context \(error)")
         }
         self.tableView.reloadData()
         
     }
-    func loadData () {
+    func loadData (arg  request : NSFetchRequest<Item> = Item.fetchRequest(),arg   predicate : NSPredicate? = nil) {
         
-        let data = try? Data(contentsOf: filePath!)
+        let catPredecate = NSPredicate(format: "isComponentOf.name MATCHES %@", selectedCategory!.name!)
         
-        let decoder = PropertyListDecoder()
+        if let addPredicate = predicate {
+            request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [catPredecate , addPredicate])
+        }else {
+            request.predicate = catPredecate
+        }
+        
+        
         do {
-        
-            arr = try decoder.decode([Item].self, from: data!)
+            try
+          arr = context.fetch(request)
             
         }catch {
-            print("Error Dcoding Item Array \(error)")
+            print("Error reading Context \(error)")
+        }
+        tableView.reloadData()
+    }
+
+   }
+extension TodoayViewController : UISearchBarDelegate {
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        
+        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        
+        loadData(arg : request, arg : predicate)
+      
+    }
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadData()
+            DispatchQueue.main.async {
+                searchBar.resignFirstResponder()
+            }
             
         }
     }
-    
-    
-    }
-
+}
 
 
