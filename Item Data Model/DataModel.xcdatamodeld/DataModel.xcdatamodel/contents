@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14490.99" systemVersion="18F132" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="colour" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="name" attributeType="String" syncable="YES"/>
         <relationship name="contains" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Item" inverseName="isComponentOf" inverseEntity="Item" syncable="YES"/>
     </entity>
@@ -10,7 +11,7 @@
         <relationship name="isComponentOf" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="contains" inverseEntity="Category" syncable="YES"/>
     </entity>
     <elements>
+        <element name="Category" positionX="1678.68359375" positionY="9.0390625" width="128" height="90"/>
         <element name="Item" positionX="1975.21484375" positionY="-6.05859375" width="128" height="88"/>
-        <element name="Category" positionX="1678.68359375" positionY="9.0390625" width="128" height="73"/>
     </elements>
 </model>

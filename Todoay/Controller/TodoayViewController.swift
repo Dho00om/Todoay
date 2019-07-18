@@ -8,9 +8,12 @@
 
 import UIKit
 import CoreData
+import SwipeCellKit
+import ChameleonFramework
 
 class TodoayViewController: UITableViewController  {
     
+    @IBOutlet weak var searchBar: UISearchBar!
     var arr = [Item]()
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var selectedCategory : Category? {
@@ -22,8 +25,22 @@ class TodoayViewController: UITableViewController  {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        tableView.rowHeight = 80.0
+        tableView.separatorStyle = .none
         
-        
+    }
+    
+   override func viewWillAppear(_ animated: Bool) {
+    
+        title = selectedCategory!.name
+        if let hexColour = selectedCategory?.colour{
+            guard let nvc = navigationController?.navigationBar else {fatalError("Navigation Controller does not exit")}
+            
+            nvc.barTintColor = UIColor(hexString: hexColour)
+            searchBar.barTintColor = UIColor(hexString: hexColour)
+            nvc.tintColor = ContrastColorOf(UIColor(hexString: hexColour)!, returnFlat: true)
+            nvc.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(UIColor(hexString: hexColour)!, returnFlat: true)]
+        }
     }
 
     //MARK - TableView DataScource Methods
@@ -34,9 +51,17 @@ class TodoayViewController: UITableViewController  {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Todoaycell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Todoaycell", for: indexPath) as! SwipeTableViewCell
         let item = arr[indexPath.row]
         cell.textLabel?.text = item.title
+        
+        if let itemColour = UIColor(hexString: selectedCategory!.colour!)?.darken(byPercentage: CGFloat (indexPath.row) / CGFloat(arr.count)) {
+            
+            cell.backgroundColor = itemColour
+            cell.textLabel?.textColor = ContrastColorOf(itemColour, returnFlat: true)
+        }
+        
+        cell.delegate = self
         
         cell.accessoryType = item.checking == true ? .checkmark : .none
         
@@ -126,7 +151,7 @@ class TodoayViewController: UITableViewController  {
     }
 
    }
-extension TodoayViewController : UISearchBarDelegate {
+extension TodoayViewController : UISearchBarDelegate ,SwipeTableViewCellDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         
@@ -148,6 +173,25 @@ extension TodoayViewController : UISearchBarDelegate {
             
         }
     }
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            self.context.delete(self.arr[indexPath.row])
+            self.arr.remove(at: indexPath.row)
+            
+            
+            self.saveData()
+            self.loadData()
+        }
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "Delete-icon")
+        
+        return [deleteAction]
+    }
+    
 }
+
 
 

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -115,7 +115,6 @@
 				3874F29DF7C3E47D2BC8D42A /* Pods-Todoay.debug.xcconfig */,
 				28D933718FEE9EF3798FEFCD /* Pods-Todoay.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
